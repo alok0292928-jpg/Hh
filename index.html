@@ -3,414 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHIKARI v10 VIP SYSTEM</title>
+    <title>NOBITA PRO USER</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; user-select: none; }
+        /* --- CORE STYLES --- */
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
-            background-color: #000;
-            color: #00ff41;
-            font-family: 'Rajdhani', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            background-color: #050505; color: white; font-family: 'Rajdhani', sans-serif;
+            margin: 0; display: flex; justify-content: center; min-height: 100vh; overflow: hidden;
+            background-image: linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        .device {
-            width: 100%;
-            max-width: 450px;
-            background: #050505;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            border: 1px solid #111;
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
-            position: relative;
+        .app-container {
+            width: 100%; max-width: 450px; height: 100vh; display: flex; flex-direction: column;
+            position: relative; background: rgba(0,0,0,0.9); border: 1px solid #111;
         }
 
-        /* --- AUTH & PLAN SCREENS STYLES --- */
-        .auth-container, .plan-container, .pay-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 200; padding: 20px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+        /* LAYERS (Login, App, Maintenance) */
+        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; }
+        .hidden { display: none !important; }
 
-        .auth-box {
-            width: 100%; background: #0a0a0a; border: 1px solid #00ff41;
-            padding: 20px; border-radius: 10px; text-align: center;
-            box-shadow: 0 0 20px rgba(0,255,65,0.2);
-        }
+        /* HEADER */
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff41; background: #0a0a0a; }
+        .brand { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; }
+        
+        /* PLAN BADGE (Dynamic) */
+        .plan-badge { padding: 4px 10px; border-radius: 5px; font-size: 10px; font-weight: bold; font-family: 'Orbitron'; text-transform: uppercase; }
+        .badge-silver { background: #333; color: #fff; border: 1px solid #aaa; }
+        .badge-gold { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid #ffd700; }
+        .badge-diamond { background: rgba(0, 229, 255, 0.2); color: #00e5ff; border: 1px solid #00e5ff; }
 
-        .input-field {
-            width: 100%; padding: 12px; margin: 10px 0;
-            background: #111; border: 1px solid #333; color: white;
-            font-family: 'Orbitron'; border-radius: 5px; outline: none;
-        }
-        .input-field:focus { border-color: #00ff41; }
+        /* CONTENT */
+        .content { flex: 1; padding: 20px; overflow-y: auto; text-align: center; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
 
-        .btn-auth {
-            width: 100%; padding: 15px; background: #00ff41; color: black;
-            font-weight: bold; font-family: 'Orbitron'; border: none;
-            cursor: pointer; margin-top: 10px;
-        }
+        /* INPUT AREA */
+        .input-card { background: #111; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .game-input { background: #000; border: 2px solid #00ff41; color: #fff; font-family: 'Orbitron'; font-size: 30px; width: 120px; text-align: center; border-radius: 10px; padding: 10px; outline: none; }
+        
+        /* CIRCLE PREDICTION */
+        .circle-container { display: flex; justify-content: center; margin: 20px 0; }
+        .prediction-circle { width: 200px; height: 200px; border-radius: 50%; border: 4px solid #222; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .pred-text { font-family: 'Orbitron'; font-weight: 900; font-size: 45px; opacity: 0; }
+        .scanning { animation: shake 0.2s infinite; color: #aaa; font-size: 20px; opacity: 1; }
+        
+        /* ANIMATIONS */
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+        .animate-result { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .green-glow { color: #00ff41; text-shadow: 0 0 30px #00ff41; }
+        .red-glow { color: #ff003c; text-shadow: 0 0 30px #ff003c; }
 
-        .plan-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;
-            margin-top: 20px;
-        }
-        .plan-card {
-            background: #111; border: 1px solid #333; padding: 15px;
-            text-align: center; border-radius: 5px; cursor: pointer;
-            transition: 0.3s;
-        }
-        .plan-card:hover, .plan-card.selected {
-            border-color: #00ff41; background: rgba(0,255,65,0.1);
-        }
-        .qr-img {
-            width: 200px; height: 200px; margin: 20px 0; border: 2px solid #fff;
-        }
+        /* NUMBERS */
+        .number-box { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .num-block { width: 50px; height: 50px; border: 1px solid #333; background: #0a0a0a; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-size: 20px; font-weight: bold; color: #aaa; }
+        .num-active { border-color: #00e5ff; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; animation: popIn 0.6s ease forwards; }
 
-        /* --- EXISTING STYLES (UNCHANGED) --- */
-        .header { padding: 15px; background: linear-gradient(180deg, #111, #000); border-bottom: 2px solid #00ff41; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .brand { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; letter-spacing: 2px; text-shadow: 0 0 10px #00ff41; }
-        .status-dot { width: 10px; height: 10px; background: #00ff41; border-radius: 50%; box-shadow: 0 0 10px #00ff41; animation: blink 1s infinite; }
-        .screen { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; display: none; }
-        .screen.active { display: block; animation: fadeUp 0.3s ease; }
-        .hud-box { background: rgba(0, 255, 65, 0.05); border: 1px solid rgba(0, 255, 65, 0.2); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; position: relative; }
-        .hud-box::before { content: ''; position: absolute; top:0; left:0; width:5px; height:100%; background:#00ff41; }
-        input.game-input { background: #000; border: 2px solid #333; color: #fff; padding: 15px; width: 120px; font-size: 30px; text-align: center; font-family: 'Orbitron'; font-weight: bold; border-radius: 5px; outline: none; transition: 0.3s; }
-        input.game-input:focus { border-color: #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.3); }
-        .btn-main { width: 100%; padding: 18px; margin-top: 15px; background: #00ff41; color: #000; border: none; font-family: 'Orbitron'; font-weight: 900; font-size: 18px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); cursor: pointer; text-transform: uppercase; }
-        .btn-main:disabled { background: #333; color: #555; cursor: wait; }
-        .result-panel { display: none; margin-top: 20px; border: 1px solid #333; padding: 20px; background: #0a0a0a; }
-        .res-type { font-size: 40px; font-family: 'Orbitron'; font-weight: 900; margin: 10px 0; }
-        .green-txt { color: #00ff41; text-shadow: 0 0 20px #00ff41; }
-        .red-txt { color: #ff003c; text-shadow: 0 0 20px #ff003c; }
-        .lucky-grid { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .l-ball { width: 45px; height: 45px; border: 2px solid #333; display: flex; justify-content: center; align-items: center; font-weight: bold; border-radius: 5px; color: #fff; font-family: 'Orbitron'; font-size: 18px; }
-        .terminal { background: #000; border: 1px solid #333; padding: 15px; font-family: monospace; font-size: 12px; color: #00ff41; height: 200px; overflow-y: auto; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        .log-line { margin-bottom: 5px; border-bottom: 1px dashed #222; padding-bottom: 2px; }
-        .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .ai-card { background: #0a0a0a; padding: 10px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .ai-name { font-size: 11px; font-weight: bold; color: #aaa; }
-        .ai-stat { width: 8px; height: 8px; background: #333; border-radius: 50%; }
-        .ai-stat.active { background: #00ff41; box-shadow: 0 0 8px #00ff41; }
-        .config-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; background: #080808; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
-        input:checked + .slider { background-color: #00ff41; }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .nav { position: absolute; bottom: 0; width: 100%; height: 70px; background: #050505; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { text-align: center; color: #555; font-size: 10px; cursor: pointer; width: 25%; font-family: 'Orbitron'; }
-        .nav-btn.active { color: #00ff41; text-shadow: 0 0 10px rgba(0,255,65,0.4); }
-        .nav-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+        /* BUTTONS */
+        .action-btn { width: 100%; padding: 15px; margin-top: 10px; background: #00ff41; border: none; color: #000; font-family: 'Orbitron'; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        
+        /* HISTORY */
+        .history-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .history-header th { padding: 10px; background: #111; color: #888; border-bottom: 2px solid #333; }
+        .history-row td { padding: 15px 5px; text-align: center; border-bottom: 1px solid #222; }
+        .status-btn { padding: 2px 8px; border: 1px solid #333; background: black; color: #aaa; font-size: 10px; cursor: pointer; }
+        .status-btn.win { border-color: #00ff41; color: #00ff41; }
+        .status-btn.loss { border-color: red; color: red; }
 
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* NAVBAR */
+        .navbar { position: absolute; bottom: 20px; left: 20px; right: 20px; height: 60px; background: #111; border: 1px solid #333; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { color: #555; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: #00ff41; text-shadow: 0 0 10px #00ff41; }
+
+        /* MAINTENANCE */
+        .maint-icon { font-size: 50px; color: red; margin-bottom: 20px; }
+        .maint-text { font-family: 'Orbitron'; font-size: 24px; color: white; margin-bottom: 10px; }
+        .maint-sub { color: #888; font-size: 12px; text-align: center; }
+
+        /* LOGIN INPUTS */
+        .login-input { background: #111; border: 1px solid #333; padding: 15px; width: 80%; color: white; text-align: center; font-family: 'Orbitron'; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="authLayer" class="auth-container">
-    <div class="brand" style="margin-bottom:20px; font-size:30px;">SHIKARI v10</div>
-    <div class="auth-box">
-        <h3 style="color:#00ff41; margin:0 0 20px 0;">ACCESS CONTROL</h3>
-        <input type="email" id="email" class="input-field" placeholder="EMAIL ADDRESS">
-        <input type="password" id="pass" class="input-field" placeholder="PASSWORD">
+    <div id="maintenanceLayer" class="layer hidden" style="z-index: 999; background: #050505;">
+        <div class="maint-icon">⚠️</div>
+        <div class="maint-text">MAINTENANCE</div>
+        <div class="maint-sub">SERVER UNDER UPGRADE.<br>PLEASE WAIT FOR ADMIN UPDATE.</div>
+    </div>
+
+    <div id="loginLayer" class="layer">
+        <h2 style="font-family:'Orbitron'; color:#00ff41; margin-bottom: 30px;">NOBITA SECURITY</h2>
+        <input type="text" id="keyInput" class="login-input" placeholder="ENTER VIP KEY">
+        <button class="action-btn" style="width: 80%;" onclick="login()">CONNECT</button>
+        <p id="loginStatus" style="color:red; font-size:12px; margin-top:10px;"></p>
+    </div>
+
+    <div id="appLayer" class="app-container hidden">
         
-        <button class="btn-auth" onclick="handleAuth('login')">LOGIN SYSTEM</button>
-        <button class="btn-auth" style="background:#333; color:white; border:1px solid #555;" onclick="handleAuth('register')">REGISTER NEW ID</button>
-        <div id="authMsg" style="font-size:10px; color:red; margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="planLayer" class="plan-container" style="display:none;">
-    <div class="brand">SELECT PLAN</div>
-    <div style="font-size:12px; color:#aaa; margin-bottom:10px;">ACTIVATE LICENSE TO USE TOOL</div>
-    
-    <div class="plan-grid">
-        <div class="plan-card" onclick="selectPlan(1, 199)">1 DAY<br><span style="color:#00ff41">₹199</span></div>
-        <div class="plan-card" onclick="selectPlan(2, 349)">2 DAYS<br><span style="color:#00ff41">₹349</span></div>
-        <div class="plan-card" onclick="selectPlan(4, 599)">4 DAYS<br><span style="color:#00ff41">₹599</span></div>
-        <div class="plan-card" onclick="selectPlan(7, 999)">7 DAYS<br><span style="color:#00ff41">₹999</span></div>
-        <div class="plan-card" onclick="selectPlan(15, 1899)">15 DAYS<br><span style="color:#00ff41">₹1899</span></div>
-        <div class="plan-card" onclick="selectPlan(30, 2999)">30 DAYS<br><span style="color:#00ff41">₹2999</span></div>
-    </div>
-    
-    <button class="btn-auth" style="margin-top:20px; background:#333; color:white;" onclick="logout()">LOGOUT</button>
-</div>
-
-<div id="payLayer" class="pay-container" style="display:none;">
-    <div class="brand">PAYMENT</div>
-    <div style="font-size:12px; color:#aaa;">SCAN QR & PAY: <span id="payAmt" style="color:#fff;">--</span></div>
-    
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=YOUR_UPI_ID_HERE&pn=SHIKARI_ADMIN" class="qr-img" id="qrImage">
-    
-    <input type="text" id="utr" class="input-field" placeholder="ENTER 12-DIGIT UTR">
-    <button class="btn-auth" onclick="submitPayment()">SUBMIT UTR</button>
-    <button class="btn-auth" style="background:#333; color:white; margin-top:10px;" onclick="document.getElementById('payLayer').style.display='none'">CANCEL</button>
-</div>
-
-<div id="mainApp" class="device" style="display:none;">
-    <div class="header">
-        <div class="brand">SHIKARI <span style="font-size:12px; color:#fff;">v10</span></div>
-        <div style="display:flex; align-items:center; gap:5px; font-size:10px; color:#aaa;">
-            VIP ACCESS <div class="status-dot"></div>
-        </div>
-        <button onclick="logout()" style="background:none; border:none; color:red; font-size:10px; cursor:pointer;">EXIT</button>
-    </div>
-
-    <div id="scr-dash" class="screen active">
-        <div class="hud-box">
-            <p style="color:#aaa; font-size:12px; letter-spacing:1px; margin-bottom:10px;">ENTER PREVIOUS RESULT</p>
-            <input type="tel" id="lastNum" class="game-input" maxlength="1" placeholder="_">
-            <button class="btn-main" id="startBtn" onclick="initiateSystem()">INITIATE SCAN</button>
+        <div class="header">
+            <div>
+                <div class="brand">NOBITA AI</div>
+                <div id="userBadge" class="plan-badge">LOADING...</div>
+            </div>
+            <button onclick="logout()" style="background:none; border:none; color:red; font-size:10px;">LOGOUT</button>
         </div>
 
-        <div id="processUI" style="display:none;">
-            <div style="font-family:'Orbitron'; font-size:12px; color:#00ff41; margin-bottom:5px;">NEURAL NET PROCESSING...</div>
-            <div style="width:100%; background:#111; height:4px; margin-bottom:15px;">
-                <div id="pBar" style="width:0%; height:100%; background:#00ff41; transition:width 0.2s;"></div>
-            </div>
-            <div id="liveAction" style="font-size:10px; color:#555; font-family:monospace;">Connecting to API Nodes...</div>
-        </div>
-
-        <div id="resultCard" class="result-panel">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa;">
-                <span>CONFIDENCE: <b id="confLvl" style="color:#fff;">0%</b></span>
-                <span>AGREEMENT: <b id="agreeLvl" style="color:#fff;">0/10</b></span>
-            </div>
-            
-            <div style="text-align:center;">
-                <div id="finalRes" class="res-type">--</div>
-                <div id="finalLogic" style="font-size:11px; color:#fff;">LOGIC: --</div>
+        <div id="tab-home" class="content tab-content active">
+            <div class="input-card">
+                <input type="tel" id="lastInput" class="game-input" maxlength="1" placeholder="?">
+                <button class="action-btn" onclick="runAnalysis()">SCAN NOW</button>
             </div>
 
-            <div style="margin-top:20px; text-align:center;">
-                <div style="font-size:10px; color:#aaa; letter-spacing:1px; margin-bottom:5px; border-top:1px dashed #333; padding-top:10px;">
-                    OPPOSITE COVER NUMBERS
-                </div>
-                <div class="lucky-grid">
-                    <div class="l-ball" id="ln1">-</div>
-                    <div class="l-ball" id="ln2">-</div>
-                    <div class="l-ball" id="ln3">-</div>
+            <div class="circle-container">
+                <div class="prediction-circle" id="mainCircle">
+                    <div style="font-size:10px; color:#aaa;">RESULT</div>
+                    <div id="predText" class="pred-text">--</div>
+                    <div id="predInfo" style="font-size:10px; color:#00e5ff; margin-top:5px; opacity:0;">CONFIDENCE: 99%</div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="scr-ai" class="screen">
-        <div class="hud-box" style="border-left:none; border-right:none; padding:10px;">
-            <div style="font-size:12px; font-weight:bold;">LIVE SYSTEM LOGS</div>
+            <div id="numbersContainer" class="number-box hidden">
+                <div class="num-block" id="n1">-</div>
+                <div class="num-block" id="n2">-</div>
+                <div class="num-block" id="n3">-</div>
+            </div>
         </div>
-        <div class="terminal" id="sysLog"><div class="log-line">> SYSTEM READY</div></div>
-        <div class="ai-grid">
-             <div class="ai-card"><span class="ai-name">TREND MASTER</span><div id="ai1" class="ai-stat active"></div></div>
-             <div class="ai-card"><span class="ai-name">CHAOS THEORY</span><div id="ai2" class="ai-stat active"></div></div>
-             </div>
-    </div>
 
-    <div id="scr-config" class="screen">
-        <div class="hud-box">
-            <div style="font-size:14px; font-weight:bold; color:#fff;">SYSTEM CONFIGURATION</div>
-            <div style="font-size:10px; color:#aaa;">VERSION 10.0.5 (ULTIMATE)</div>
+        <div id="tab-history" class="content tab-content">
+            <div style="font-family:'Orbitron'; font-size:16px; margin-bottom:10px;">SESSION HISTORY</div>
+            <table class="history-table">
+                <thead class="history-header"><tr><th>LAST</th><th>PRED</th><th>RESULT</th></tr></thead>
+                <tbody id="historyList"></tbody>
+            </table>
         </div>
-        <div class="config-row">
-            <span style="font-size:12px; color:#ddd;">Inverse Number Logic</span>
-            <label class="switch"><input type="checkbox" checked disabled><span class="slider"></span></label>
-        </div>
-        <div class="config-row">
-            <span style="font-size:12px; color:#ddd;">User ID</span>
-            <span id="displayUid" style="font-size:10px; color:#00ff41;">--</span>
-        </div>
-        <div class="config-row">
-            <span style="font-size:12px; color:#ddd;">Plan Expiry</span>
-            <span id="displayExpiry" style="font-size:10px; color:orange;">--</span>
-        </div>
-    </div>
 
-    <div class="nav">
-        <div class="nav-btn active" onclick="nav('dash', this)"><span class="nav-icon">👁️</span>SCAN</div>
-        <div class="nav-btn" onclick="nav('ai', this)"><span class="nav-icon">🧠</span>SYSTEM</div>
-        <div class="nav-btn" onclick="nav('config', this)"><span class="nav-icon">⚙️</span>CONFIG</div>
+        <div class="navbar">
+            <div class="nav-item active" onclick="switchTab('home', this)">⚡</div>
+            <div class="nav-item" onclick="switchTab('history', this)">📜</div>
+        </div>
     </div>
-</div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, update, child, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // --- FIREBASE CONFIG ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyDnNEOIvGgucZfKWxKgRjSqnVVXAb2_Za0",
-    authDomain: "v10j-15b32.firebaseapp.com",
-    projectId: "v10j-15b32",
-    storageBucket: "v10j-15b32.firebasestorage.app",
-    messagingSenderId: "773701949730",
-    appId: "1:773701949730:web:442b5d2dc01fa51cb56d7b",
-    measurementId: "G-ZKKLDK0SDY"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDXlyYirIWVN-geJclEXIV408hC5jwB4fg",
+        authDomain: "v110-25f09.firebaseapp.com",
+        databaseURL: "https://v110-25f09-default-rtdb.firebaseio.com",
+        projectId: "v110-25f09",
+        storageBucket: "v110-25f09.firebasestorage.app",
+        messagingSenderId: "971519760374",
+        appId: "1:971519760374:web:e59863fa4d05a22f1c59d7"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  // --- HELPER: GET DEVICE ID ---
-  function getDeviceId() {
-      let did = localStorage.getItem('shikari_device_id');
-      if (!did) {
-          did = 'dev_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('shikari_device_id', did);
-      }
-      return did;
-  }
+    // --- SYSTEM VARIABLES ---
+    let systemLogic = { mode: "normal", gold_win: 80, diamond_win: 95 }; // Default
+    let userPlan = "silver"; // Default
 
-  // --- HELPER: SHOW SPECIFIC SCREEN ---
-  function showScreen(screenName) {
-      console.log("Switching to screen:", screenName); // Debug Log
-      document.getElementById('authLayer').style.display = 'none';
-      document.getElementById('planLayer').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('payLayer').style.display = 'none';
+    // --- 1. LISTEN FOR MAINTENANCE & LOGIC UPDATE ---
+    onValue(ref(db, 'system_config'), (snap) => {
+        if(snap.exists()) {
+            const config = snap.val();
+            
+            // Check Maintenance
+            if(config.maintenance === true) {
+                document.getElementById('maintenanceLayer').classList.remove('hidden');
+            } else {
+                document.getElementById('maintenanceLayer').classList.add('hidden');
+            }
 
-      if(screenName === 'auth') document.getElementById('authLayer').style.display = 'flex';
-      if(screenName === 'plan') document.getElementById('planLayer').style.display = 'flex';
-      if(screenName === 'app') document.getElementById('mainApp').style.display = 'flex';
-      if(screenName === 'pay') document.getElementById('payLayer').style.display = 'flex';
-  }
+            // Update Logic silently
+            systemLogic = config;
+            console.log("System Updated:", systemLogic);
+        }
+    });
 
-  // --- AUTH FUNCTION ---
-  window.handleAuth = async (type) => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('pass').value;
-      const msg = document.getElementById('authMsg');
-      const deviceId = getDeviceId();
+    // --- 2. LOGIN SYSTEM ---
+    window.login = async () => {
+        const key = document.getElementById('keyInput').value.trim();
+        const status = document.getElementById('loginStatus');
+        const deviceId = localStorage.getItem('nobita_did') || 'dev_' + Date.now();
+        localStorage.setItem('nobita_did', deviceId);
 
-      if(!email || !pass) { msg.innerText = "Please fill email & password"; return; }
-      msg.innerText = "Connecting to Server...";
+        if(!key) { status.innerText = "Enter Key"; return; }
+        status.innerText = "Verifying...";
 
-      try {
-          if (type === 'register') {
-              // 1. Register User
-              const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-              const uid = userCredential.user.uid;
-              
-              console.log("User Created:", uid);
+        try {
+            const snap = await get(child(ref(db), `access_keys/${key}`));
+            if(snap.exists()) {
+                const data = snap.val();
+                const now = Date.now();
 
-              // 2. Create Database Doc (WITH 1 DAY FREE TRIAL)
-              // Abhi 24 ghante ka time add kar rahe hain taaki dashboard dikhe
-              const oneDayTrial = Date.now() + (24 * 60 * 60 * 1000); 
+                // Validation
+                if(data.expiry < now) { status.innerText = "Key Expired!"; return; }
+                if(data.deviceId && data.deviceId !== deviceId) { status.innerText = "Locked to another device!"; return; }
+                
+                // First Time Lock
+                if(!data.deviceId) await update(ref(db, `access_keys/${key}`), { deviceId: deviceId });
 
-              await setDoc(doc(db, "users", uid), {
-                  email: email,
-                  deviceId: deviceId,
-                  planExpiry: oneDayTrial, // FIX: Giving 1 Day Free Plan
-                  createdAt: new Date().toISOString()
-              });
-              
-              msg.innerText = "Success! Redirecting...";
-              // onAuthStateChanged will handle the rest
-              
-          } else {
-              // Login
-              await signInWithEmailAndPassword(auth, email, pass);
-              msg.innerText = "Login Success...";
-          }
-      } catch (error) {
-          console.error("Auth Error:", error);
-          msg.innerText = "Error: " + error.message;
-      }
-  };
+                // Save Session
+                localStorage.setItem('nobita_key', key);
+                localStorage.setItem('nobita_plan', data.plan); // SAVE PLAN FROM DB
+                
+                startApp(data.plan);
+            } else {
+                status.innerText = "Invalid Key";
+            }
+        } catch(e) {
+            status.innerText = "Network Error";
+        }
+    };
 
-  // --- PAYMENT FUNCTIONS ---
-  window.selectPlan = (days, price) => {
-      document.getElementById('payAmt').innerText = "₹" + price;
-      showScreen('pay'); // Use helper
-      window.selectedPlanDays = days;
-  };
+    // --- 3. START APP UI ---
+    function startApp(plan) {
+        userPlan = plan || 'silver'; // Set Global Plan Variable
+        
+        document.getElementById('loginLayer').classList.add('hidden');
+        document.getElementById('appLayer').classList.remove('hidden');
 
-  window.submitPayment = async () => {
-      const utr = document.getElementById('utr').value;
-      if(!auth.currentUser) return;
-      const uid = auth.currentUser.uid;
-      
-      if(!utr || utr.length < 5) { alert("Enter valid UTR"); return; }
-      
-      try {
-          await setDoc(doc(db, "payment_requests", uid + "_" + Date.now()), {
-              uid: uid,
-              email: auth.currentUser.email,
-              utr: utr,
-              daysRequested: window.selectedPlanDays,
-              status: "pending",
-              timestamp: new Date().toISOString()
-          });
-          alert("Payment Submitted! Wait for Admin.");
-          showScreen('plan'); // Go back to plan screen
-      } catch(e) {
-          alert("Error: " + e.message);
-      }
-  };
+        // Update Badge
+        const badge = document.getElementById('userBadge');
+        badge.innerText = userPlan.toUpperCase() + " USER";
+        badge.className = `plan-badge badge-${userPlan}`;
 
-  window.logout = () => {
-      signOut(auth).then(() => location.reload());
-  };
+        // Show/Hide Numbers based on Plan
+        if(userPlan === 'silver') {
+            document.getElementById('numbersContainer').classList.add('hidden');
+        } else {
+            document.getElementById('numbersContainer').classList.remove('hidden');
+        }
+    }
 
-  // --- MAIN LOGIC OBSERVER ---
-  onAuthStateChanged(auth, async (user) => {
-      if (user) {
-          console.log("User Detected:", user.uid);
-          
-          try {
-              const userDocRef = doc(db, "users", user.uid);
-              const userDoc = await getDoc(userDocRef);
+    // --- 4. PREDICTION LOGIC (CONTROLLED BY SYSTEM LOGIC) ---
+    window.runAnalysis = () => {
+        const input = document.getElementById('lastInput').value;
+        if(!input) return;
 
-              if (userDoc.exists()) {
-                  const data = userDoc.data();
-                  const currentDeviceId = getDeviceId();
+        const predText = document.getElementById('predText');
+        const predInfo = document.getElementById('predInfo');
 
-                  // 1. DEVICE LOCK CHECK
-                  if (data.deviceId !== currentDeviceId) {
-                      // Agar device alag hai, toh update kar do (Auto-Login New Device)
-                      await updateDoc(userDocRef, { deviceId: currentDeviceId });
-                  }
+        // Reset UI
+        predText.classList.remove('animate-result', 'green-glow', 'red-glow');
+        predText.classList.add('scanning');
+        predText.innerText = "SCAN";
+        predInfo.style.opacity = 0;
+        
+        // Hide numbers initially
+        document.querySelectorAll('.num-block').forEach(b => {
+            b.innerText = "-";
+            b.classList.remove('num-active');
+        });
 
-                  // 2. PLAN EXPIRY CHECK
-                  const now = Date.now();
-                  console.log("Plan Expiry:", data.planExpiry, "Current Time:", now);
+        setTimeout(() => {
+            // LOGIC CORE
+            let result = Math.random() > 0.5 ? "BIG" : "SMALL";
+            
+            // Apply System Logic Injection (Fake implementation of win rate)
+            // If system mode is aggressive, maybe flip result randomly
+            if(systemLogic.mode === 'aggressive' && Math.random() > 0.7) {
+                result = result === "BIG" ? "SMALL" : "BIG";
+            }
 
-                  if (data.planExpiry > now) {
-                      // PLAN ACTIVE -> SHOW DASHBOARD
-                      showScreen('app');
-                      
-                      // Update UI details
-                      document.getElementById('displayUid').innerText = user.uid.slice(0,6);
-                      document.getElementById('displayExpiry').innerText = new Date(data.planExpiry).toDateString();
-                  } else {
-                      // PLAN EXPIRED -> SHOW PLAN PAGE
-                      showScreen('plan');
-                  }
+            // Display Result
+            predText.classList.remove('scanning');
+            void predText.offsetWidth; // Trigger Reflow
+            predText.innerText = result;
+            predText.classList.add('animate-result', result === "BIG" ? "green-glow" : "red-glow");
+            predInfo.style.opacity = 1;
 
-              } else {
-                  // Doc missing? Create it properly or Logout
-                  console.log("User Doc Missing!");
-                  showScreen('plan'); 
-              }
-          } catch (error) {
-              console.error("Data Fetch Error:", error);
-              alert("Server Error. Check Internet.");
-          }
-      } else {
-          // NO USER -> SHOW LOGIN
-          showScreen('auth');
-      }
-  });
+            // HANDLE NUMBERS (GOLD/DIAMOND ONLY)
+            if(userPlan !== 'silver') {
+                let nums = [];
+                if(userPlan === 'gold') {
+                    // Gold = Opposite (Cover)
+                    nums = result === "BIG" ? [0,2,4] : [5,7,9];
+                } else {
+                    // Diamond = Direct
+                    nums = result === "BIG" ? [6,8,9] : [1,3,4];
+                }
+                
+                // Shuffle
+                nums.sort(() => Math.random() - 0.5);
+                
+                setTimeout(() => {
+                    document.getElementById('n1').innerText = nums[0];
+                    document.getElementById('n2').innerText = nums[1];
+                    document.getElementById('n3').innerText = nums[2];
+                    document.querySelectorAll('.num-block').forEach(b => b.classList.add('num-active'));
+                }, 300);
+            }
+
+            // Add History
+            addHistory(input, result);
+
+        }, 1500);
+    };
+
+    function addHistory(last, pred) {
+        const list = document.getElementById('historyList');
+        const row = document.createElement('tr');
+        row.className = 'history-row';
+        row.innerHTML = `
+            <td>${last}</td>
+            <td style="color:${pred==='BIG'?'#00ff41':'red'}; font-weight:bold;">${pred}</td>
+            <td>
+                <button class="status-btn win" onclick="this.style.background='green'; this.style.color='black'">W</button>
+                <button class="status-btn loss" onclick="this.style.background='red'; this.style.color='white'">L</button>
+            </td>
+        `;
+        list.prepend(row);
+    }
+
+    // --- UTILS ---
+    window.switchTab = (id, el) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    };
+
+    window.logout = () => {
+        localStorage.removeItem('nobita_key');
+        localStorage.removeItem('nobita_plan');
+        location.reload();
+    };
+
+    // Auto Login Check
+    if(localStorage.getItem('nobita_key')) {
+        // We verify again to check if plan changed or expired
+        window.login(); 
+    }
+
 </script>
-
 </body>
 </html>
